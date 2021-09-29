@@ -6,15 +6,26 @@ d3.json(queryUrl).then(function (data) {
 
   // Define a function that we want to run once for each feature in the features array.
   // Give each feature a popup that describes the place and time of the earthquake.
-  function onEachFeature(feature, layer) {
+  function bindpoptoearthquake(feature, layer) {
     layer.bindPopup(`<h3>${feature.properties.place}</h3><hr><p>${new Date(feature.properties.time)}</p>`);
+  }
+  function generateearthquakestyle(feature, layer) {
+    return {
+      "color": "#000"
+    }
+  }
+  function generateearthquakemarker(feature, latitudelong) {
+    return L.circleMarker(latitudelong)
   }
 
   // Create a GeoJSON layer that contains the features array on the earthquakeData object.
   // Run the onEachFeature function once for each piece of data in the array.
   var earthquakes = L.geoJSON(data.features, {
-    onEachFeature: onEachFeature
+    onEachFeature: bindpoptoearthquake,
+    style: generateearthquakestyle,
+    pointToLayer: generateearthquakemarker
   });
+
 
   // Create the base layers.
   var street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -30,10 +41,15 @@ d3.json(queryUrl).then(function (data) {
     "Street Map": street,
     "Topographic Map": topo
   };
+  var tectonicplates = new L.LayerGroup();
+  d3.json("https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json").then(function (tectonicdata) {
+    L.geoJSON(tectonicdata) .addTo(tectonicplates)
+  });
 
   // Create an overlay object to hold our overlay.
   var overlayMaps = {
-    Earthquakes: earthquakes
+    "Earthquakes": earthquakes,
+    "Tectonic Plates": tectonicplates
   };
 
   // Create our map, giving it the streetmap and earthquakes layers to display on load.
