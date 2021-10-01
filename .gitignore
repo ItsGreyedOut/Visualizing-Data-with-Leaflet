@@ -109,3 +109,5 @@ dmypy.json
 # API
 api_keys.py
 config.py
+config.js 
+config.json
